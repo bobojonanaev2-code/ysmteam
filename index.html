@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <title>CyberCraft — Мы делаем цифровые продукты</title>
+  <meta name="description" content="CyberCraft — премиальная IT-студия. Frontend, DevOps & CI/CD, UI/UX, брендинг.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+<base target="_blank">
+</head>
+<body>
+  <canvas id="webgl"></canvas>
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <header class="header">
+    <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="services.html">Услуги</a>
+      <a href="portfolio.html">Проекты</a>
+      <a href="about.html">Команда</a>
+      <a href="contact.html">Контакты</a>
+    </nav>
+    <a class="header-cta" href="contact.html">Начать проект</a>
+    <button class="burger" aria-label="Меню"><i></i><i></i><i></i></button>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <p class="label">IT-студия полного цикла &middot; Est. 2024</p>
+      <h1>Мы делаем<br><em>цифровые</em><br>продукты</h1>
+      <p class="hero-sub">CyberCraft — студия веб-разработки. Проектируем, разрабатываем и запускаем сайты, сервисы и бренды, которые выглядят дорого и работают быстро.</p>
+      <div class="scroll-hint"><span class="line"></span>Листайте вниз</div>
+      <div class="hero-meta">Frontend / DevOps<br>UI&middot;UX / Брендинг</div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>Frontend — DevOps &amp; CI/CD — UI/UX — Брендинг —&nbsp;</span>
+        <span>Frontend — DevOps &amp; CI/CD — UI/UX — Брендинг —&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- QUOTE -->
+    <section class="quote reveal">
+      <p>&laquo;Мы создаём стратегические цифровые решения, которые формируют <b>живую связь</b> между брендом и его аудиторией&raquo;.</p>
+      <small>— Команда CyberCraft</small>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Что мы делаем</p>
+          <h2 class="display">Услуги</h2>
+        </div>
+        <a class="btn btn--small" href="services.html">Все услуги &nearr;</a>
+      </div>
+      <div class="srows reveal">
+        <a class="srow" href="services.html">
+          <span class="srow-num">/ 01</span>
+          <span class="srow-title">Frontend</span>
+          <span class="srow-desc">Высокопроизводительные интерфейсы на современном стеке. Скорость, плавные анимации, доступность.</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+        <a class="srow" href="services.html">
+          <span class="srow-num">/ 02</span>
+          <span class="srow-title">DevOps &amp; CI/CD</span>
+          <span class="srow-desc">Инфраструктура, которая не падает: автодеплой, мониторинг, масштабирование под нагрузку.</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+        <a class="srow" href="services.html">
+          <span class="srow-num">/ 03</span>
+          <span class="srow-title">UI/UX</span>
+          <span class="srow-desc">Интерфейсы, которые ведут пользователя к цели. Исследования, прототипы, дизайн-системы.</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+        <a class="srow" href="services.html">
+          <span class="srow-num">/ 04</span>
+          <span class="srow-title">Брендинг</span>
+          <span class="srow-desc">Айдентика уровня &laquo;дорого и дерзко&raquo;: логотипы, гайдлайны, арт-дирекшн.</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="section" style="padding-top:0">
+      <div class="stats reveal">
+        <div class="stat">
+          <div class="stat-num"><span data-count="120">0</span>+</div>
+          <div class="stat-label">Проектов запущено</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span data-count="14">0</span></div>
+          <div class="stat-label">Стран — география клиентов</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span data-count="98">0</span>%</div>
+          <div class="stat-label">Клиентов возвращаются</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span data-count="15">0</span></div>
+          <div class="stat-label">Наград и упоминаний</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="section" style="padding-top:0">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Процесс</p>
+          <h2 class="display">Как мы работаем</h2>
+        </div>
+      </div>
+      <div class="process reveal">
+        <div class="step">
+          <div class="step-num">/ 01</div>
+          <h3>Исследование</h3>
+          <p>Погружаемся в бизнес, аудиторию и цели. Фундамент всего, что мы строим.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">/ 02</div>
+          <h3>Стратегия</h3>
+          <p>Архитектура, пользовательские сценарии и конверсионная модель.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">/ 03</div>
+          <h3>Дизайн</h3>
+          <p>Премиальные интерфейсы, где каждая деталь — осознанна: типографика, движение, ритм.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">/ 04</div>
+          <h3>Разработка</h3>
+          <p>Чистый, быстрый код. Скорость, доступность и масштабируемость из коробки.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">/ 05</div>
+          <h3>Запуск</h3>
+          <p>Тестирование, деплой и поддержка после релиза. Мы не исчезаем после старта.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS PREVIEW -->
+    <section class="section" style="padding-top:0">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Избранное</p>
+          <h2 class="display">Проекты</h2>
+        </div>
+        <a class="btn btn--small" href="portfolio.html">Все проекты &nearr;</a>
+      </div>
+      <div class="projects reveal">
+        <a class="project tilt" href="portfolio.html">
+          <div class="project-media">
+            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1400&auto=format&fit=crop" alt="Финансовая аналитика">
+          </div>
+          <div class="project-info">
+            <h3>Финансовая аналитика</h3>
+            <span>FinTech &middot; 2026</span>
+          </div>
+        </a>
+        <a class="project tilt" href="portfolio.html">
+          <div class="project-media">
+            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1400&auto=format&fit=crop" alt="Премиум E-Commerce">
+          </div>
+          <div class="project-info">
+            <h3>Премиум E-Commerce</h3>
+            <span>Retail &middot; 2025</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta reveal">
+      <p class="label">Следующий шаг</p>
+      <h2 class="display">Давайте создадим<br>что-то великое</h2>
+      <a class="btn" href="contact.html">Обсудить проект &nearr;</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="marquee footer-marquee">
+      <div class="marquee-track">
+        <span>CyberCraft — Цифровые продукты — Frontend — DevOps — UI/UX —&nbsp;</span>
+        <span>CyberCraft — Цифровые продукты — Frontend — DevOps — UI/UX —&nbsp;</span>
+      </div>
+    </div>
+    <div class="footer-grid">
+      <div>
+        <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
+        <p class="footer-desc">Премиальная IT-студия. Проектируем и разрабатываем цифровые продукты, которые выглядят дорого и работают быстро.</p>
+      </div>
+      <div>
+        <h4>Меню</h4>
+        <ul>
+          <li><a href="index.html">Главная</a></li>
+          <li><a href="services.html">Услуги</a></li>
+          <li><a href="portfolio.html">Проекты</a></li>
+          <li><a href="about.html">Команда</a></li>
+          <li><a href="contact.html">Контакты</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Услуги</h4>
+        <ul>
+          <li><a href="services.html">Frontend</a></li>
+          <li><a href="services.html">DevOps &amp; CI/CD</a></li>
+          <li><a href="services.html">UI/UX</a></li>
+          <li><a href="services.html">Брендинг</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Контакты</h4>
+        <ul>
+          <li><a href="mailto:hello@cybercraft.studio">hello@cybercraft.studio</a></li>
+          <li><a href="tel:+79990000000">+7 999 000-00-00</a></li>
+          <li><a href="contact.html">Москва &middot; Remote</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 CyberCraft Studio</span>
+      <span>Сделано с точностью до пикселя</span>
+    </div>
+  </footer>
+
+  <button class="sound-toggle" aria-label="Включить или выключить звук">
+    <span class="bars"><i></i><i></i><i></i><i></i></span>
+    <span class="sound-label">Звук: выкл</span>
+  </button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
