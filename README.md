@@ -1,26 +1,28 @@
-# 🚀 CyberCraft - Сайт команды
+# 🚀 CyberCraft - Корпоративный сайт команды
 
-[![Deploy to GitHub Pages](https://github.com/bobojonanaev2-code/cybercraft-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/bobojonanaev2-code/cybercraft-site/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/bobojonanaev2-code/ysmteam/actions/workflows/deploy.yml/badge.svg)](https://github.com/bobojonanaev2-code/ysmteam/actions/workflows/deploy.yml)
 
 ## 🌐 Ссылки на проект
 
-👉 **[Живой сайт (GitHub Pages)](https://bobojonanaev2-code.github.io/cybercraft-site/)** 👈
+👉 **[Живой сайт (GitHub Pages)](https://bobojonanaev2-code.github.io/ysmteam/)** 👈
 
-- [История деплоев (Deployments)](https://github.com/bobojonanaev2-code/cybercraft-site/deployments)
-- [Окружения (Environments)](https://github.com/bobojonanaev2-code/cybercraft-site/settings/environments)
+- [История деплоев (Deployments)](https://github.com/bobojonanaev2-code/ysmteam/deployments)
+- [Окружения (Environments)](https://github.com/bobojonanaev2-code/ysmteam/settings/environments)
 
-## 👥 Состав команды
+## 👥 Состав команды и зоны ответственности
 
-- **Бобожон Анаев** (Лидер) — Создание репозитория, настройка GitHub Pages.
-- **Ярослав Рыжов** (DevOps) — Разработка CI/CD, настройка GitHub Actions.
-- **Сергей Сорочинский** (Программист 1) — Разработка HTML-структуры.
-- **Илья Миронов** (Программист 2) — Дизайн (CSS), анимации (JS).
+| Участник | Роль | Зона ответственности | GitHub |
+| :--- | :--- | :--- | :--- |
+| **Бобожон Анаев** | Лидер команды / PM | Создание репозитория, настройка GitHub Pages, координация, 3D-дизайн | [@bobojonanaev2-code](https://github.com/bobojonanaev2-code) |
+| **Ярослав Рыжов** | DevOps-инженер | Настройка CI/CD пайплайнов, автоматизация деплоя | [@yarik-profile](https://github.com/karat05) |
+| **Сергей Сорочинский** | Программист 1 (Frontend) | Разработка HTML-структуры, верстка страниц, тексты | [@f1ble](https://github.com/f1ble) |
+| **Илья Миронов** | Программист 2 (UI/UX) | Разработка стилей (CSS), интерактивные анимации (JS) | [@yeletsyungg](https://github.com/yeletsyungg) |
 
 ## 📂 Структура проекта (Mermaid)
 
 ```mermaid
 graph TD
-    A[cybercraft-site] --> B[.github/workflows/deploy.yml]
+    A[ysmteam] --> B[.github/workflows/deploy.yml]
     A --> C[index.html]
     A --> D[about.html]
     A --> E[services.html]
