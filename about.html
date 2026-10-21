@@ -8,13 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23ff4d00' stroke-width='9' stroke-dasharray='74 33' stroke-linecap='round' transform='rotate(115 32 32)'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
-<base target="_blank">
 </head>
 <body>
   <canvas id="webgl"></canvas>
   <div class="cursor-dot"></div>
   <div class="cursor-ring"></div>
+  <div class="noise"></div>
+  <div class="progress-bar"></div>
+  <div class="hover-preview"><img src="" alt=""></div>
 
   <header class="header">
     <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
@@ -31,44 +34,101 @@
 
   <main>
     <section class="page-hero">
-      <p class="label">Кто мы</p>
-      <h1>Команда</h1>
-      <p>Четыре специалиста, закрывающие полный цикл продукта. Никаких менеджеров менеджеров — только люди, которые делают.</p>
+      <p class="label reveal">Кто мы</p>
+      <h1 class="reveal" data-delay="1">Команда</h1>
+      <p class="reveal" data-delay="2">Четыре специалиста, закрывающие полный цикл продукта. Никаких менеджеров менеджеров — только люди, которые делают. И да — мы инопланетяне по части кода.</p>
     </section>
 
     <section class="section">
       <div class="team">
         <div class="member tilt reveal">
           <div class="member-avatar">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Bobojon&backgroundColor=0a0a0a" alt="Аватар Бобожона Анаева">
+            <img src="images/team/bobozhon.png" alt="3D-портрет Бобожона Анаева" loading="lazy" decoding="async">
           </div>
           <h3>Бобожон Анаев</h3>
           <div class="member-role">Project Manager</div>
           <p>Выстраивает процесс так, чтобы дедлайны соблюдались, а клиент спал спокойно. 7 лет в управлении digital-проектами.</p>
+          <button class="member-telegram" type="button" aria-label="Скопировать Telegram-ник Бобожона Анаева: @silhouette_05" data-copy-username="@silhouette_05" data-tooltip="@silhouette_05">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.8 4.2 18.5 20c-.25 1.12-.9 1.4-1.82.87l-5.05-3.72-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.14 9.36-8.46c.4-.36-.09-.56-.62-.2L5.7 13.54.7 11.98c-1.08-.34-1.1-1.08.23-1.6L20.5 2.8c.9-.33 1.68.22 1.3 1.4Z"/></svg>
+            <span class="telegram-label">Telegram</span>
+          </button>
         </div>
         <div class="member tilt reveal" data-delay="1">
           <div class="member-avatar">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Yaroslav&backgroundColor=0a0a0a" alt="Аватар Ярослава Рыжова">
+            <img src="images/team/yaroslav.png" alt="3D-портрет Ярослава Рыжова" loading="lazy" decoding="async">
           </div>
           <h3>Ярослав Рыжов</h3>
           <div class="member-role">DevOps</div>
           <p>Инфраструктура, которая не падает. CI/CD, Kubernetes, мониторинг. Автоматизирует всё, что движется.</p>
+          <button class="member-telegram" type="button" aria-label="Скопировать Telegram-ник Ярослава Рыжова: @RemyMartin5" data-copy-username="@RemyMartin5" data-tooltip="@RemyMartin5">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.8 4.2 18.5 20c-.25 1.12-.9 1.4-1.82.87l-5.05-3.72-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.14 9.36-8.46c.4-.36-.09-.56-.62-.2L5.7 13.54.7 11.98c-1.08-.34-1.1-1.08.23-1.6L20.5 2.8c.9-.33 1.68.22 1.3 1.4Z"/></svg>
+            <span class="telegram-label">Telegram</span>
+          </button>
         </div>
         <div class="member tilt reveal" data-delay="2">
           <div class="member-avatar">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Sergey&backgroundColor=0a0a0a" alt="Аватар Сергея Сорочинского">
+            <img src="images/team/sergey.png" alt="3D-портрет Сергея Сорочинского" loading="lazy" decoding="async">
           </div>
           <h3>Сергей Сорочинский</h3>
           <div class="member-role">Frontend</div>
           <p>Превращает дизайн в быстрый и живой код. Специализация — сложные анимации и WebGL-интерфейсы.</p>
+          <button class="member-telegram" type="button" aria-label="Скопировать Telegram-ник Сергея Сорочинского: @imballhog2thecore" data-copy-username="@imballhog2thecore" data-tooltip="@imballhog2thecore">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.8 4.2 18.5 20c-.25 1.12-.9 1.4-1.82.87l-5.05-3.72-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.14 9.36-8.46c.4-.36-.09-.56-.62-.2L5.7 13.54.7 11.98c-1.08-.34-1.1-1.08.23-1.6L20.5 2.8c.9-.33 1.68.22 1.3 1.4Z"/></svg>
+            <span class="telegram-label">Telegram</span>
+          </button>
         </div>
         <div class="member tilt reveal" data-delay="3">
           <div class="member-avatar">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Ilya&backgroundColor=0a0a0a" alt="Аватар Ильи Миронова">
+            <img src="images/team/ilya.png" alt="3D-портрет Ильи Миронова" loading="lazy" decoding="async">
           </div>
           <h3>Илья Миронов</h3>
           <div class="member-role">UI/UX</div>
           <p>Проектирует интерфейсы, которые ведут пользователя к цели. Исследования, прототипы, дизайн-системы.</p>
+          <button class="member-telegram" type="button" aria-label="Скопировать Telegram-ник Ильи Миронова: @truelifecrime" data-copy-username="@truelifecrime" data-tooltip="@truelifecrime">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.8 4.2 18.5 20c-.25 1.12-.9 1.4-1.82.87l-5.05-3.72-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.14 9.36-8.46c.4-.36-.09-.56-.62-.2L5.7 13.54.7 11.98c-1.08-.34-1.1-1.08.23-1.6L20.5 2.8c.9-.33 1.68.22 1.3 1.4Z"/></svg>
+            <span class="telegram-label">Telegram</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- IMAGE BAND -->
+    <section class="img-band">
+      <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1800&auto=format&fit=crop" alt="Планета Земля из космоса" data-parallax="0.12">
+      <div class="img-band-caption">
+        <p class="label">География</p>
+        <h2 class="display">Земля &middot; Марс soon</h2>
+      </div>
+    </section>
+
+    <!-- VALUES -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Принципы</p>
+          <h2 class="display">Наши ценности</h2>
+        </div>
+      </div>
+      <div class="values reveal">
+        <div class="value">
+          <div class="value-num">/ 01</div>
+          <h3>Скорость</h3>
+          <p>Первый прототип за неделю, релизы без простоев. Быстро — не значит халтурно.</p>
+        </div>
+        <div class="value">
+          <div class="value-num">/ 02</div>
+          <h3>Качество</h3>
+          <p>Код, который не стыдно показать. Тесты, ревью, 100 баллов Lighthouse.</p>
+        </div>
+        <div class="value">
+          <div class="value-num">/ 03</div>
+          <h3>Честность</h3>
+          <p>Сроки и бюджет фиксируем в договоре. Никаких сюрпризов в процессе.</p>
+        </div>
+        <div class="value">
+          <div class="value-num">/ 04</div>
+          <h3>Дерзость</h3>
+          <p>Не боимся нестандартных решений, сложных ниш и смелых идей.</p>
         </div>
       </div>
     </section>

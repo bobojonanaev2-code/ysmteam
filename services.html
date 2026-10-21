@@ -8,13 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23ff4d00' stroke-width='9' stroke-dasharray='74 33' stroke-linecap='round' transform='rotate(115 32 32)'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
-<base target="_blank">
 </head>
 <body>
   <canvas id="webgl"></canvas>
   <div class="cursor-dot"></div>
   <div class="cursor-ring"></div>
+  <div class="noise"></div>
+  <div class="progress-bar"></div>
+  <div class="hover-preview"><img src="" alt=""></div>
 
   <header class="header">
     <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
@@ -31,44 +34,96 @@
 
   <main>
     <section class="page-hero">
-      <p class="label">Возможности</p>
-      <h1>Услуги</h1>
-      <p>Четыре направления, один результат — цифровой продукт, который работает на бизнес. Наведите на строку, чтобы увидеть наш подход.</p>
+      <p class="label reveal">Возможности</p>
+      <h1 class="reveal" data-delay="1">Услуги</h1>
+      <p class="reveal" data-delay="2">Четыре направления, один результат — цифровой продукт, который работает на бизнес. Наведите на строку, чтобы увидеть наш подход.</p>
     </section>
 
     <section class="section">
       <div class="srows srows--invert">
-        <div class="srow reveal">
+        <a class="srow reveal" href="contact.html" data-img="https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 01</span>
           <span class="srow-title">Landing Pages</span>
           <span class="srow-desc">Продающие одностраничные сайты с анимациями уровня Awwwards. Прототип за неделю, запуск за три.</span>
           <span class="srow-tags"><span>Дизайн</span><span>Анимации</span><span>A/B-тесты</span></span>
           <span class="srow-arrow">&nearr;</span>
-        </div>
-        <div class="srow reveal" data-delay="1">
+        </a>
+        <a class="srow reveal" data-delay="1" href="contact.html" data-img="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 02</span>
           <span class="srow-title">Корпоративные сайты</span>
           <span class="srow-desc">Многостраничные платформы для бизнеса: от информационной архитектуры до админ-панели и SEO.</span>
           <span class="srow-tags"><span>CMS</span><span>SEO</span><span>Мультиязычность</span></span>
           <span class="srow-arrow">&nearr;</span>
-        </div>
-        <div class="srow reveal" data-delay="2">
+        </a>
+        <a class="srow reveal" data-delay="2" href="contact.html" data-img="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 03</span>
           <span class="srow-title">Автоматизация</span>
           <span class="srow-desc">Интеграции, боты, CRM-воронки и внутренние инструменты. Убираем рутину и масштабируем процессы.</span>
           <span class="srow-tags"><span>API</span><span>Боты</span><span>CRM</span></span>
           <span class="srow-arrow">&nearr;</span>
-        </div>
-        <div class="srow reveal" data-delay="3">
+        </a>
+        <a class="srow reveal" data-delay="3" href="contact.html" data-img="https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 04</span>
           <span class="srow-title">Технический аудит</span>
           <span class="srow-desc">Независимый разбор скорости, безопасности и качества кода. План роста с приоритетами и цифрами.</span>
           <span class="srow-tags"><span>Performance</span><span>Security</span><span>Код-ревью</span></span>
           <span class="srow-arrow">&nearr;</span>
-        </div>
+        </a>
       </div>
     </section>
 
+    <!-- IMAGE BAND -->
+    <section class="img-band">
+      <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1800&auto=format&fit=crop" alt="Инженерная культура" data-parallax="0.12">
+      <div class="img-band-caption">
+        <p class="label">Подход</p>
+        <h2 class="display">Инженерная культура</h2>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Стек</p>
+          <h2 class="display">Технологии</h2>
+        </div>
+      </div>
+      <div class="chips reveal">
+        <span>React</span><span>TypeScript</span><span>Next.js</span><span>Vue</span>
+        <span>Node.js</span><span>Three.js</span><span>WebGL</span><span>GSAP</span>
+        <span>Docker</span><span>Kubernetes</span><span>AWS</span><span>PostgreSQL</span>
+        <span>Figma</span><span>CI/CD</span>
+      </div>
+    </section>
+
+    <!-- DETAIL CARDS -->
+    <section class="section" style="padding-top:0">
+      <div class="cards-2">
+        <article class="dcard reveal">
+          <div class="dcard-media">
+            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200&auto=format&fit=crop" alt="Код">
+          </div>
+          <div class="dcard-body">
+            <p class="label">Принцип 01</p>
+            <h3>Чистый код как стандарт</h3>
+            <p>Тесты, code review и автоматические проверки на каждом коммите. Проект легко передать другой команде — и он продолжит жить.</p>
+          </div>
+        </article>
+        <article class="dcard reveal" data-delay="1">
+          <div class="dcard-media">
+            <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=1200&auto=format&fit=crop" alt="Работа над продуктом">
+          </div>
+          <div class="dcard-body">
+            <p class="label">Принцип 02</p>
+            <h3>Прозрачный процесс</h3>
+            <p>Демо каждую неделю, доступ к трекеру задач, фиксированная смета. Вы всегда знаете, за что платите.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- STATS -->
     <section class="section" style="padding-top:0">
       <div class="stats reveal">
         <div class="stat">

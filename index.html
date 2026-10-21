@@ -8,13 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23ff4d00' stroke-width='9' stroke-dasharray='74 33' stroke-linecap='round' transform='rotate(115 32 32)'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
-<base target="_blank">
 </head>
 <body>
   <canvas id="webgl"></canvas>
   <div class="cursor-dot"></div>
   <div class="cursor-ring"></div>
+  <div class="noise"></div>
+  <div class="progress-bar"></div>
+  <div class="hover-preview"><img src="" alt=""></div>
 
   <header class="header">
     <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
@@ -32,11 +35,21 @@
   <main>
     <!-- HERO -->
     <section class="hero">
-      <p class="label">IT-студия полного цикла &middot; Est. 2024</p>
-      <h1>Мы делаем<br><em>цифровые</em><br>продукты</h1>
-      <p class="hero-sub">CyberCraft — студия веб-разработки. Проектируем, разрабатываем и запускаем сайты, сервисы и бренды, которые выглядят дорого и работают быстро.</p>
+      <p class="label reveal">IT-студия полного цикла &middot; Est. 2024</p>
+      <h1 class="reveal" data-delay="1">Мы делаем<br><em>цифровые</em><br>продукты</h1>
+      <p class="hero-sub reveal" data-delay="2">CyberCraft — студия веб-разработки. Проектируем, разрабатываем и запускаем сайты, сервисы и бренды, которые выглядят дорого и работают быстро.</p>
+      <div class="avail reveal" data-delay="3"><i></i>Открыты для новых проектов</div>
       <div class="scroll-hint"><span class="line"></span>Листайте вниз</div>
       <div class="hero-meta">Frontend / DevOps<br>UI&middot;UX / Брендинг</div>
+      <div class="hero-badge" aria-hidden="true">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <path id="badge-circle" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"/>
+          </defs>
+          <text><textPath href="#badge-circle">CyberCraft &bull; Digital Studio &bull; Est. 2024 &bull;</textPath></text>
+        </svg>
+        <span class="hero-badge-center">&nearr;</span>
+      </div>
     </section>
 
     <!-- MARQUEE -->
@@ -53,6 +66,15 @@
       <small>— Команда CyberCraft</small>
     </section>
 
+    <!-- IMAGE BAND (parallax) -->
+    <section class="img-band">
+      <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1800&auto=format&fit=crop" alt="Студия CyberCraft" data-parallax="0.12">
+      <div class="img-band-caption">
+        <p class="label">Студия</p>
+        <h2 class="display">Москва &middot; Remote</h2>
+      </div>
+    </section>
+
     <!-- SERVICES -->
     <section class="section">
       <div class="section-head reveal">
@@ -63,25 +85,25 @@
         <a class="btn btn--small" href="services.html">Все услуги &nearr;</a>
       </div>
       <div class="srows reveal">
-        <a class="srow" href="services.html">
+        <a class="srow" href="services.html" data-img="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 01</span>
           <span class="srow-title">Frontend</span>
           <span class="srow-desc">Высокопроизводительные интерфейсы на современном стеке. Скорость, плавные анимации, доступность.</span>
           <span class="srow-arrow">&nearr;</span>
         </a>
-        <a class="srow" href="services.html">
+        <a class="srow" href="services.html" data-img="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 02</span>
           <span class="srow-title">DevOps &amp; CI/CD</span>
           <span class="srow-desc">Инфраструктура, которая не падает: автодеплой, мониторинг, масштабирование под нагрузку.</span>
           <span class="srow-arrow">&nearr;</span>
         </a>
-        <a class="srow" href="services.html">
+        <a class="srow" href="services.html" data-img="https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 03</span>
           <span class="srow-title">UI/UX</span>
           <span class="srow-desc">Интерфейсы, которые ведут пользователя к цели. Исследования, прототипы, дизайн-системы.</span>
           <span class="srow-arrow">&nearr;</span>
         </a>
-        <a class="srow" href="services.html">
+        <a class="srow" href="services.html" data-img="https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=900&auto=format&fit=crop">
           <span class="srow-num">/ 04</span>
           <span class="srow-title">Брендинг</span>
           <span class="srow-desc">Айдентика уровня &laquo;дорого и дерзко&raquo;: логотипы, гайдлайны, арт-дирекшн.</span>
@@ -90,8 +112,16 @@
       </div>
     </section>
 
+    <!-- CLIENTS (ghost marquee) -->
+    <div class="marquee marquee--ghost">
+      <div class="marquee-track">
+        <span>Nova Bank &mdash; Orbit Media &mdash; Quantum Retail &mdash; Atlas Soft &mdash; Vertex Group &mdash; Luna Labs &mdash;&nbsp;</span>
+        <span>Nova Bank &mdash; Orbit Media &mdash; Quantum Retail &mdash; Atlas Soft &mdash; Vertex Group &mdash; Luna Labs &mdash;&nbsp;</span>
+      </div>
+    </div>
+
     <!-- STATS -->
-    <section class="section" style="padding-top:0">
+    <section class="section">
       <div class="stats reveal">
         <div class="stat">
           <div class="stat-num"><span data-count="120">0</span>+</div>
@@ -134,7 +164,7 @@
         <div class="step">
           <div class="step-num">/ 03</div>
           <h3>Дизайн</h3>
-          <p>Премиальные интерфейсы, где каждая деталь — осознанна: типографика, движение, ритм.</p>
+          <p>Премиальные интерфейсы, где каждая деталь осознанна: типографика, движение, ритм.</p>
         </div>
         <div class="step">
           <div class="step-num">/ 04</div>
@@ -177,6 +207,64 @@
             <span>Retail &middot; 2025</span>
           </div>
         </a>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="section" style="padding-top:0">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Отзывы</p>
+          <h2 class="display">Что говорят клиенты</h2>
+        </div>
+      </div>
+      <div class="testimonials reveal">
+        <div class="tcard">
+          <div class="tcard-mark">&laquo;</div>
+          <p>CyberCraft пересобрали наш сайт за шесть недель. Конверсия выросла в 2,4 раза — цифры говорят сами за себя.</p>
+          <div class="tcard-author">Анна Морозова</div>
+          <div class="tcard-role">CMO &middot; Nova Bank</div>
+        </div>
+        <div class="tcard">
+          <div class="tcard-mark">&laquo;</div>
+          <p>Самая инженерная команда из всех, с кем я работал. CI/CD настроили за неделю, релизы теперь без нервов.</p>
+          <div class="tcard-author">Дмитрий Ковалёв</div>
+          <div class="tcard-role">CTO &middot; Orbit Media</div>
+        </div>
+        <div class="tcard">
+          <div class="tcard-mark">&laquo;</div>
+          <p>Дизайн уровня мировых студий, а коммуникация — как с внутренней командой. Рекомендую всем, кто дорожит брендом.</p>
+          <div class="tcard-author">Марина Соколова</div>
+          <div class="tcard-role">Основатель &middot; Luna Labs</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" style="padding-top:0">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Вопросы</p>
+          <h2 class="display">FAQ</h2>
+        </div>
+      </div>
+      <div class="faq reveal">
+        <div class="faq-item">
+          <button class="faq-q">Сколько времени занимает разработка сайта?<span class="fi">+</span></button>
+          <div class="faq-a"><p>Лендинг — от 3 недель, корпоративный сайт — от 6, сложный сервис — от 10. Точные сроки фиксируем в договоре до старта и держим их.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Как формируется стоимость?<span class="fi">+</span></button>
+          <div class="faq-a"><p>После короткого созвона готовим детальную смету: работы разбиты по этапам, вы платите за результат, а не за часы. Никаких дополнительных счетов в процессе.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Как строится коммуникация?<span class="fi">+</span></button>
+          <div class="faq-a"><p>Закреплённый проджект-менеджер, еженедельные демо и доступ к трекеру задач. Вы всегда видите, что происходит с проектом, — без лишних созвонов.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Что после запуска?<span class="fi">+</span></button>
+          <div class="faq-a"><p>Каждый проект включает гарантийную поддержку. Дальше — по желанию: абонемент на развитие, новые фичи, аналитика и рост конверсии.</p></div>
+        </div>
       </div>
     </section>
 

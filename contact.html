@@ -8,13 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23ff4d00' stroke-width='9' stroke-dasharray='74 33' stroke-linecap='round' transform='rotate(115 32 32)'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
-<base target="_blank">
 </head>
 <body>
   <canvas id="webgl"></canvas>
   <div class="cursor-dot"></div>
   <div class="cursor-ring"></div>
+  <div class="noise"></div>
+  <div class="progress-bar"></div>
+  <div class="hover-preview"><img src="" alt=""></div>
 
   <header class="header">
     <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
@@ -31,9 +34,9 @@
 
   <main>
     <section class="page-hero">
-      <p class="label">Контакты</p>
-      <h1>Давайте<br><em>обсудим</em></h1>
-      <p>Расскажите о задаче — вернёмся с планом действий в течение 24 часов.</p>
+      <p class="label reveal">Контакты</p>
+      <h1 class="reveal" data-delay="1">Давайте<br><em>обсудим</em></h1>
+      <p class="reveal" data-delay="2">Расскажите о задаче — вернёмся с планом действий в течение 24 часов.</p>
     </section>
 
     <section class="contact-wrap">
@@ -76,6 +79,43 @@
           <b>Часы</b>
           <span>Пн–Пт, 10:00–19:00</span>
         </div>
+        <a class="contact-mail" href="mailto:hello@cybercraft.studio">hello@cybercraft.studio &nearr;</a>
+      </div>
+    </section>
+
+    <!-- SOCIALS -->
+    <section class="section" style="padding-top:0">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Соцсети</p>
+          <h2 class="display">Следите за нами</h2>
+        </div>
+      </div>
+      <div class="srows reveal">
+        <a class="srow" href="#" data-img="https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=900&auto=format&fit=crop">
+          <span class="srow-num">/ 01</span>
+          <span class="srow-title">Behance</span>
+          <span class="srow-desc">Кейсы и процесс дизайна</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+        <a class="srow" href="#" data-img="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=900&auto=format&fit=crop">
+          <span class="srow-num">/ 02</span>
+          <span class="srow-title">Dribbble</span>
+          <span class="srow-desc">Шоты интерфейсов и анимаций</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+        <a class="srow" href="#" data-img="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=900&auto=format&fit=crop">
+          <span class="srow-num">/ 03</span>
+          <span class="srow-title">GitHub</span>
+          <span class="srow-desc">Open-source и эксперименты</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
+        <a class="srow" href="#" data-img="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=900&auto=format&fit=crop">
+          <span class="srow-num">/ 04</span>
+          <span class="srow-title">Telegram</span>
+          <span class="srow-desc">Канал студии: инсайды и вакансии</span>
+          <span class="srow-arrow">&nearr;</span>
+        </a>
       </div>
     </section>
   </main>
