@@ -61,6 +61,67 @@ window.addEventListener('mousemove', function (e) {
 });
 window.addEventListener('mouseleave', function () { mouse.active = false; });
 
+/* Плавное затухание колеса; сенсорная прокрутка остаётся нативной. */
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var fine = window.matchMedia('(pointer: fine)');
+  var frame = 0, target = window.scrollY, previousTime = 0, lastWritten = window.scrollY;
+  var oldBehavior = '', direction = 0;
+  function stop() {
+    if (frame) cancelAnimationFrame(frame);
+    if (frame) document.documentElement.style.scrollBehavior = oldBehavior;
+    frame = 0; target = window.scrollY; direction = 0;
+  }
+  function tick(time) {
+    var dt = Math.min((time - previousTime) / 1000, 0.05);
+    previousTime = time;
+    var max = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    target = Math.max(0, Math.min(max, target));
+    var current = window.scrollY;
+    var next = current + (target - current) * (1 - Math.exp(-dt / 0.16));
+    if (Math.abs(target - current) < 1.1) next = target;
+    window.scrollTo({ top: next, left: window.scrollX, behavior: 'instant' });
+    lastWritten = window.scrollY;
+    if (next === target) { stop(); return; }
+    frame = requestAnimationFrame(tick);
+  }
+  function nestedScroll(element, delta) {
+    for (var node = element; node && node !== document.body && node !== document.documentElement; node = node.parentElement) {
+      if (node.matches('textarea,select,[contenteditable="true"]')) return true;
+      var style = getComputedStyle(node);
+      if (/(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 1 &&
+          (delta < 0 ? node.scrollTop > 0 : node.scrollTop + node.clientHeight < node.scrollHeight - 1)) return true;
+      if (/(contain|none)/.test(style.overscrollBehaviorY)) return true;
+    }
+    return false;
+  }
+  window.addEventListener('wheel', function (event) {
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || reduced.matches || !fine.matches || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    if (getComputedStyle(document.body).overflowY === 'hidden' || nestedScroll(event.target, event.deltaY)) { stop(); return; }
+    var delta = event.deltaY * (event.deltaMode === 1 ? 18 : event.deltaMode === 2 ? innerHeight : 1);
+    if (!delta || !event.cancelable) return;
+    var nextDirection = Math.sign(delta);
+    if (!frame || (direction && direction !== nextDirection)) target = window.scrollY;
+    target = Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, target + delta));
+    direction = nextDirection;
+    event.preventDefault();
+    if (!frame) {
+      oldBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = 'auto';
+      previousTime = performance.now(); lastWritten = window.scrollY;
+      frame = requestAnimationFrame(tick);
+    }
+  }, { passive: false });
+  window.addEventListener('scroll', function () {
+    if (frame && Math.abs(window.scrollY - lastWritten) > 3) stop();
+  }, { passive: true });
+  ['pointerdown', 'touchstart', 'keydown', 'resize', 'hashchange', 'pagehide'].forEach(function (name) {
+    window.addEventListener(name, stop, { passive: true });
+  });
+  reduced.addEventListener('change', stop);
+})();
+
+
 /* ================= 1. Custom cursor ================= */
 (function () {
   var dot = document.querySelector('.cursor-dot');
@@ -192,128 +253,171 @@ window.addEventListener('mouseleave', function () { mouse.active = false; });
 var Sound = (function () {
   var btn = document.querySelector('.sound-toggle');
   var label = btn ? btn.querySelector('.sound-label') : null;
-  var ctx = null, master = null, filter = null;
-  var playing = false, timer = null, chordIdx = 0;
-  var chords = [
-    [110.00, 164.81, 220.00, 261.63],
-    [98.00, 146.83, 196.00, 246.94],
-    [87.31, 130.81, 174.61, 220.00]
-  ];
-
-  function ensureCtx() {
-    if (ctx) return;
-    var AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC();
-    master = ctx.createGain();
-    master.gain.value = 0;
-    filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 750;
-    filter.Q.value = 4;
-    filter.connect(master);
-    master.connect(ctx.destination);
-    var lfo = ctx.createOscillator();
-    var lfoGain = ctx.createGain();
-    lfo.frequency.value = 0.07;
-    lfoGain.gain.value = 380;
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
-    lfo.start();
-  }
-
-  function playChord() {
-    var freqs = chords[chordIdx % chords.length];
-    chordIdx++;
-    var t = ctx.currentTime;
-    freqs.forEach(function (f, i) {
-      var osc = ctx.createOscillator();
-      osc.type = (i % 2) ? 'sawtooth' : 'triangle';
-      osc.frequency.value = f;
-      var g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.09, t + 1.6);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 7.6);
-      osc.connect(g); g.connect(filter);
-      osc.start(t); osc.stop(t + 7.8);
-      var osc2 = ctx.createOscillator();
-      osc2.type = 'sine';
-      osc2.frequency.value = f * 2.003;
-      var g2 = ctx.createGain();
-      g2.gain.setValueAtTime(0.0001, t);
-      g2.gain.exponentialRampToValueAtTime(0.028, t + 2.2);
-      g2.gain.exponentialRampToValueAtTime(0.0001, t + 7.9);
-      osc2.connect(g2); g2.connect(filter);
-      osc2.start(t); osc2.stop(t + 8);
-    });
-    timer = setTimeout(playChord, 6000);
-  }
+  var ctx, music, effects, ambience, echo, voices = [], timer = null;
+  var desired = true, chordIndex = 0, lastPointerSound = -1000;
+  // A quiet, unhurried D-major / B-minor / G-major / A-sus ambient piece.
+  var chords = [[146.83, 220, 277.18, 329.63], [123.47, 185, 220, 293.66],
+    [98, 146.83, 185, 246.94], [110, 164.81, 220, 293.66]];
+  var melodies = [[440, 554.37, 659.25], [587.33, 440, 369.99],
+    [493.88, 369.99, 293.66], [329.63, 440, 293.66]];
+  try { desired = localStorage.getItem('cybercraft-sound') !== 'off'; } catch (_) {}
 
   function refreshUI() {
+    var audible = desired && ctx && ctx.state === 'running' && !document.hidden;
     if (!btn) return;
-    btn.classList.toggle('is-on', playing);
-    if (label) label.textContent = playing ? 'Звук: вкл' : 'Звук: выкл';
+    btn.classList.toggle('is-on', !!audible);
+    btn.setAttribute('aria-pressed', String(!!audible));
+    btn.setAttribute('aria-label', audible ? 'Выключить звук' : 'Включить звук');
+    if (label) label.textContent = audible ? 'Звук: вкл' : desired ? 'Включить звук' : 'Звук: выкл';
   }
 
-  function start() {
-    ensureCtx();
-    ctx.resume();
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.setTargetAtTime(0.16, ctx.currentTime, 1.2);
-    if (!timer) playChord();
-    playing = true;
-    refreshUI();
+  function ensureCtx() {
+    if (ctx) return true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    music = ctx.createGain(); music.gain.value = 0; music.connect(ctx.destination);
+    effects = ctx.createGain(); effects.gain.value = desired ? 1 : 0; effects.connect(ctx.destination);
+    ambience = ctx.createBiquadFilter();
+    ambience.type = 'lowpass'; ambience.frequency.value = 1700; ambience.Q.value = 0.35;
+    ambience.connect(music);
+    // A quiet filtered echo gives the sparse notes space without a sharp attack.
+    echo = ctx.createDelay(2); echo.delayTime.value = 0.72;
+    var feedback = ctx.createGain(); feedback.gain.value = 0.22;
+    var echoFilter = ctx.createBiquadFilter(); echoFilter.frequency.value = 1100;
+    var wet = ctx.createGain(); wet.gain.value = 0.2;
+    echo.connect(echoFilter); echoFilter.connect(feedback); feedback.connect(echo);
+    echoFilter.connect(wet); wet.connect(ambience);
+    ctx.addEventListener('statechange', function () {
+      if (ctx.state === 'running' && desired && !document.hidden) beginMusic();
+      else { clearInterval(timer); timer = null; }
+      refreshUI();
+    });
+    return true;
   }
 
-  function stop() {
-    clearTimeout(timer); timer = null;
-    if (master) master.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.4);
-    playing = false;
-    refreshUI();
-  }
-
-  if (btn) {
-    btn.addEventListener('click', function () { playing ? stop() : start(); });
-    // Попытка автоплея сразу при загрузке
-    start();
-    // Если браузер заблокировал (нет пользовательского жеста) —
-    // запускаем звук при ЛЮБОМ первом взаимодействии
-    var resume = function () {
-      if (ctx && ctx.state === 'suspended') ctx.resume();
+  function note(frequency, start, duration, volume, attack, detune) {
+    var osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = frequency; osc.detune.value = detune || 0;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume, start + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    osc.connect(gain); gain.connect(ambience); gain.connect(echo);
+    var voice = { osc: osc, gain: gain };
+    voices.push(voice);
+    osc.onended = function () {
+      osc.disconnect(); gain.disconnect();
+      var index = voices.indexOf(voice);
+      if (index !== -1) voices.splice(index, 1);
     };
-    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
-      document.addEventListener(ev, resume);
+    osc.start(start); osc.stop(start + duration + 0.05);
+  }
+
+  function phrase() {
+    if (!desired || document.hidden || ctx.state !== 'running') return;
+    var start = ctx.currentTime + 0.04;
+    var index = chordIndex++ % chords.length;
+    chords[index].forEach(function (frequency, i) {
+      note(frequency, start, 11, 0.045, 1.8, i % 2 ? 3 : -3);
+    });
+    melodies[index].forEach(function (frequency, i) {
+      // Rounded, quiet bell notes, with long spaces and no percussion.
+      note(frequency, start + 0.45 + i * 2.6, 4.4, 0.038, 0.09);
+      note(frequency * 2, start + 0.45 + i * 2.6, 1.6, 0.004, 0.06);
     });
   }
 
-  // Короткий "тик" при клике по кнопкам
-  var clickCtx = null;
-  function playClick() {
-    try {
-      if (!clickCtx) clickCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (clickCtx.state === 'suspended') clickCtx.resume();
-      var t = clickCtx.currentTime;
-      var o = clickCtx.createOscillator();
-      var g = clickCtx.createGain();
-      o.type = 'triangle';
-      o.frequency.setValueAtTime(660, t);
-      o.frequency.exponentialRampToValueAtTime(180, t + 0.07);
-      g.gain.setValueAtTime(0.045, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-      o.connect(g); g.connect(clickCtx.destination);
-      o.start(t); o.stop(t + 0.1);
-    } catch (e) { /* без звука — не страшно */ }
+  function clearNotes() {
+    voices.slice().forEach(function (voice) {
+      try { voice.osc.stop(); } catch (_) {}
+    });
   }
 
+  function beginMusic() {
+    if (!desired || document.hidden || ctx.state !== 'running') return;
+    music.gain.setTargetAtTime(0.34, ctx.currentTime, 0.45);
+    effects.gain.setTargetAtTime(1, ctx.currentTime, 0.01);
+    if (timer !== null) return;
+    phrase();
+    timer = setInterval(phrase, 8000);
+  }
+
+  function unlock() {
+    if (!desired || document.hidden) return Promise.resolve(false);
+    try {
+      if (!ensureCtx()) return Promise.resolve(false);
+      if (ctx.state === 'running') { beginMusic(); refreshUI(); return Promise.resolve(true); }
+      // Retry in each trusted gesture even if an earlier autoplay request is pending.
+      return ctx.resume().then(function () {
+        beginMusic(); refreshUI();
+        return desired && ctx.state === 'running';
+      }, function () { refreshUI(); return false; });
+    } catch (_) { refreshUI(); return Promise.resolve(false); }
+  }
+
+  function playClick() {
+    return unlock().then(function (ready) {
+      if (!ready || !desired) return;
+      var now = ctx.currentTime, osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(760, now);
+      osc.frequency.exponentialRampToValueAtTime(330, now + 0.055);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.085, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
+      osc.connect(gain); gain.connect(effects);
+      osc.onended = function () { osc.disconnect(); gain.disconnect(); };
+      osc.start(now); osc.stop(now + 0.085);
+    });
+  }
+
+  if (btn) btn.addEventListener('click', function () {
+    var audible = desired && ctx && ctx.state === 'running';
+    desired = !audible;
+    try { localStorage.setItem('cybercraft-sound', desired ? 'on' : 'off'); } catch (_) {}
+    if (desired) { unlock(); playClick(); }
+    else {
+      clearInterval(timer); timer = null;
+      clearNotes();
+      if (ctx) {
+        music.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
+        effects.gain.setTargetAtTime(0, ctx.currentTime, 0.01);
+      }
+    }
+    refreshUI();
+  });
+
+  var interactive = 'a[href],button,input[type="submit"],[role="button"],.srow';
+  document.addEventListener('pointerdown', function (event) {
+    if (!event.isTrusted || event.button !== 0) return;
+    var control = event.target.closest(interactive);
+    if (control && control.closest('.sound-toggle')) return;
+    unlock();
+    if (control && !control.disabled) { lastPointerSound = performance.now(); playClick(); }
+  }, { capture: true, passive: true });
+  document.addEventListener('keydown', function (event) {
+    if (event.isTrusted && !event.repeat && !event.target.closest('.sound-toggle')) unlock();
+  }, { capture: true });
+  document.addEventListener('click', function (event) {
+    var control = event.target.closest(interactive);
+    if (!control || control.disabled || control.closest('.sound-toggle')) return;
+    if (event.detail === 0 || performance.now() - lastPointerSound > 600) playClick();
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      clearInterval(timer); timer = null;
+      clearNotes();
+      if (ctx && ctx.state === 'running') ctx.suspend().catch(function () {});
+    } else unlock();
+    refreshUI();
+  });
+  window.addEventListener('pageshow', function () { unlock(); });
+  // Request autoplay as soon as this script loads. If blocked, trusted gestures retry.
+  unlock();
+  refreshUI();
   return { playClick: playClick };
 })();
 
-(function () {
-  ['.btn', '.header-cta', '.nav a', '.srow', '.burger', '.faq-q'].forEach(function (sel) {
-    document.querySelectorAll(sel).forEach(function (el) {
-      el.addEventListener('click', function () { Sound.playClick(); });
-    });
-  });
-})();
 
 /* ================= 10. FAQ accordion ================= */
 (function () {
@@ -597,29 +701,28 @@ document.querySelectorAll('img').forEach(function (image) {
   }));
   globeNodes.renderOrder = 3;
   globeNodes.frustumCulled = false;
-  group.add(globeNodes);
+  var cage = new THREE.Group();
+  group.add(cage);
+  cage.add(globeNodes);
 
   var edgeSubdivisions = 8;
   var networkBaseLines = new Float32Array(networkEdges.length * edgeSubdivisions * 2 * 3);
   var networkLinePositions = new Float32Array(networkBaseLines.length);
-  function writeGreatCirclePoint(a, b, progress, offset) {
+  function writeEdgePoint(a, b, progress, offset) {
     var ax = networkBase[a * 3], ay = networkBase[a * 3 + 1], az = networkBase[a * 3 + 2];
     var bx = networkBase[b * 3], by = networkBase[b * 3 + 1], bz = networkBase[b * 3 + 2];
-    var dot = THREE.MathUtils.clamp((ax * bx + ay * by + az * bz) / (sphereRadius * sphereRadius), -1, 1);
-    var arc = Math.acos(dot);
-    var sinArc = Math.sin(arc);
-    var weightA = sinArc > 0.0001 ? Math.sin((1 - progress) * arc) / sinArc : 1 - progress;
-    var weightB = sinArc > 0.0001 ? Math.sin(progress * arc) / sinArc : progress;
-    networkBaseLines[offset] = ax * weightA + bx * weightB;
-    networkBaseLines[offset + 1] = ay * weightA + by * weightB;
-    networkBaseLines[offset + 2] = az * weightA + bz * weightB;
+    // Straight original edges at rest, continuously bent samples on hover.
+    networkBaseLines[offset] = ax + (bx - ax) * progress;
+    networkBaseLines[offset + 1] = ay + (by - ay) * progress;
+    networkBaseLines[offset + 2] = az + (bz - az) * progress;
   }
+
   var lineCursor = 0;
   for (var ei = 0; ei < networkEdges.length; ei++) {
     var edge = networkEdges[ei];
     for (var si = 0; si < edgeSubdivisions; si++) {
-      writeGreatCirclePoint(edge[0], edge[1], si / edgeSubdivisions, lineCursor);
-      writeGreatCirclePoint(edge[0], edge[1], (si + 1) / edgeSubdivisions, lineCursor + 3);
+      writeEdgePoint(edge[0], edge[1], si / edgeSubdivisions, lineCursor);
+      writeEdgePoint(edge[0], edge[1], (si + 1) / edgeSubdivisions, lineCursor + 3);
       lineCursor += 6;
     }
   }
@@ -635,48 +738,9 @@ document.querySelectorAll('img').forEach(function (image) {
   var networkLines = new THREE.LineSegments(networkLineGeometry, networkMaterial);
   networkLines.renderOrder = 2;
   networkLines.frustumCulled = false;
-  group.add(networkLines);
+  cage.add(networkLines);
 
-  var softGeometry = new THREE.SphereGeometry(sphereRadius * 1.006, 64, 48);
-  var softPosition = softGeometry.attributes.position;
-  var softBase = new Float32Array(softPosition.array);
-  var softUniforms = {
-    cursorDirection: { value: new THREE.Vector3(0, 0, 1) },
-    hover: { value: 0 }
-  };
-  var softMaterial = new THREE.MeshBasicMaterial({
-    color: 0xff4d00, transparent: true, opacity: 1,
-    blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-    depthWrite: false, toneMapped: false
-  });
-  softMaterial.onBeforeCompile = function (shader) {
-    shader.uniforms.uSoftCursorDirection = softUniforms.cursorDirection;
-    shader.uniforms.uSoftHover = softUniforms.hover;
-    shader.vertexShader = shader.vertexShader.replace(
-      '#include <common>',
-      '#include <common>\nvarying vec3 vSoftDirection;'
-    ).replace(
-      '#include <begin_vertex>',
-      '#include <begin_vertex>\nvSoftDirection = normalize(position);'
-    );
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <common>',
-      '#include <common>\nuniform vec3 uSoftCursorDirection;\nuniform float uSoftHover;\nvarying vec3 vSoftDirection;'
-    ).replace(
-      '#include <color_fragment>',
-      '#include <color_fragment>\n' +
-      'float softAngle = acos(clamp(dot(normalize(vSoftDirection), normalize(uSoftCursorDirection)), -1.0, 1.0));\n' +
-      'float softFocus = exp(-pow(softAngle / 0.9, 2.0) * 0.5);\n' +
-      'float softLip = exp(-pow((softAngle - 0.96) / 0.38, 2.0) * 0.5);\n' +
-      'diffuseColor.a *= 0.012 + uSoftHover * (0.045 + 0.125 * softFocus + 0.055 * softLip);\n' +
-      'diffuseColor.rgb *= mix(0.5, 1.0, softFocus);'
-    );
-  };
-  softMaterial.customProgramCacheKey = function () { return 'cybercraft-soft-orb-hover'; };
-  var softShell = new THREE.Mesh(softGeometry, softMaterial);
-  softShell.renderOrder = 1;
-  softShell.frustumCulled = false;
-  group.add(softShell);
+  // The cage stays transparent: no surface mesh or hover fill.
 
   var orbit = new THREE.Mesh(
     new THREE.TorusGeometry(2.05, 0.018, 8, 120),
@@ -687,109 +751,96 @@ document.querySelectorAll('img').forEach(function (image) {
   orbit.renderOrder = 4;
   group.add(orbit);
 
-  /* --- Анимация: медленный дрейф и реакция на курсор --- */
-  var clock = new THREE.Clock();
-  var cursorDirection = new THREE.Vector3(0, 0, 1);
-  var pointerNdc = new THREE.Vector3();
-  var pointerWorld = new THREE.Vector3();
-  var pointerPlaneNormal = new THREE.Vector3();
-  var groupWorldPosition = new THREE.Vector3();
-  var groupWorldQuaternion = new THREE.Quaternion();
-  var pointerRay = new THREE.Ray();
-  var pointerPlane = new THREE.Plane();
-  var deformation = 0;
+  // Soft light around the existing orbit, with no surface covering the cage.
+  var orbitHalo = new THREE.Mesh(
+    new THREE.TorusGeometry(2.05, 0.065, 8, 120),
+    new THREE.MeshBasicMaterial({ color: 0xff6a21, transparent: true, opacity: 0.11,
+      blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  orbit.add(orbitHalo);
 
-  function deformPointInto(target, offset, bx, by, bz, t, amount, speed) {
-    var nx = bx / sphereRadius, ny = by / sphereRadius, nz = bz / sphereRadius;
-    var normalLength = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-    nx /= normalLength; ny /= normalLength; nz /= normalLength;
+  var clock = new THREE.Clock();
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var elapsed = 0, deformation = 0;
+  var cursorDirection = new THREE.Vector3(0, 0, 1);
+  var worldHoverDirection = new THREE.Vector3(0, 0, 1);
+  var targetDirection = new THREE.Vector3();
+  var pointerNdc = new THREE.Vector3(), pointerWorld = new THREE.Vector3();
+  var groupWorldPosition = new THREE.Vector3(), cageQuaternion = new THREE.Quaternion();
+  var pointerRay = new THREE.Ray(), hitSphere = new THREE.Sphere();
+
+  function deformPointInto(target, offset, bx, by, bz, t, amount) {
+    var length = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+    var nx = bx / length, ny = by / length, nz = bz / length;
     var facing = THREE.MathUtils.clamp(nx * cursorDirection.x + ny * cursorDirection.y + nz * cursorDirection.z, -1, 1);
-    var angle = Math.acos(facing);
-    var dentRatio = angle / 0.82;
-    var lipRatio = (angle - 0.92) / 0.34;
-    var dent = Math.exp(-dentRatio * dentRatio * 0.5);
-    var raisedLip = Math.exp(-lipRatio * lipRatio * 0.5);
-    var softWave = Math.sin(angle * 5.2 - t * 1.25 + nx * 1.1 + ny * 0.8) * Math.exp(-angle * 1.35) * 0.022;
-    var radial = 1 + amount * (-0.17 * dent + 0.075 * raisedLip + softWave);
-    var pull = amount * (0.12 + speed * 0.035) * Math.exp(-Math.pow(angle / 1.1, 2) * 0.5);
-    var tangentX = cursorDirection.x - nx * facing;
-    var tangentY = cursorDirection.y - ny * facing;
-    var tangentZ = cursorDirection.z - nz * facing;
-    target[offset] = bx * radial + tangentX * sphereRadius * pull;
-    target[offset + 1] = by * radial + tangentY * sphereRadius * pull;
-    target[offset + 2] = bz * radial + tangentZ * sphereRadius * pull;
+    // A broad continuous field bends edge interiors as well as their endpoints.
+    var focus = Math.exp(-(1 - facing) / 0.38);
+    var wave = Math.sin(t * 1.5 + nx * 2.1 + ny * 1.7) * 0.012;
+    var radial = 1 + amount * focus * (-0.115 + wave);
+    var pull = amount * focus * 0.075;
+    target[offset] = bx * radial + (cursorDirection.x - nx * facing) * sphereRadius * pull;
+    target[offset + 1] = by * radial + (cursorDirection.y - ny * facing) * sphereRadius * pull;
+    target[offset + 2] = bz * radial + (cursorDirection.z - nz * facing) * sphereRadius * pull;
   }
 
   (function animate() {
     requestAnimationFrame(animate);
-    var t = clock.getElapsedTime();
+    var dt = Math.min(clock.getDelta(), 0.05);
+    var calm = reducedMotion.matches;
+    elapsed += calm ? 0 : dt;
+    var t = elapsed, follow = 1 - Math.exp(-dt * 2.4);
 
-    var speed = Math.min(mouse.speed / 42, 1);
+    // The wireframe turns continuously, independent of cursor movement.
+    cage.rotation.set(Math.sin(t * 0.13) * 0.13, t * 0.16, t * 0.025);
+    group.rotation.x += ((calm ? 0 : -mouse.y * 0.16) - group.rotation.x) * follow;
+    group.rotation.y += ((calm ? 0 : mouse.x * 0.2) - group.rotation.y) * follow;
+    group.rotation.z = Math.sin(t * 0.19) * 0.035;
+    group.position.x += (baseX + (calm ? 0 : mouse.x * 0.22) - group.position.x) * follow;
+    group.position.y += (Math.sin(t * 0.38) * 0.12 - (calm ? 0 : mouse.y * 0.12) - group.position.y) * follow;
+    group.scale.setScalar(baseScale);
+    emblem.rotation.y = Math.sin(t * 0.28) * 0.17;
+    emblem.rotation.x = Math.sin(t * 0.21) * 0.08;
+    orbit.rotation.set(0.9 + Math.sin(t * 0.24) * 0.18, t * 0.12, -0.34 + Math.sin(t * 0.32) * 0.18);
+
+    camera.position.x += ((calm ? 0 : mouse.x * 0.18) - camera.position.x) * follow;
+    camera.position.y += ((calm ? 0 : -mouse.y * 0.15) - camera.position.y) * follow;
+    camera.lookAt(scene.position);
+    camera.updateMatrixWorld();
     group.updateMatrixWorld(true);
+    group.getWorldPosition(groupWorldPosition);
+    hitSphere.center.copy(groupWorldPosition);
+    hitSphere.radius = sphereRadius * baseScale;
     pointerNdc.set(mouse.x, -mouse.y, 0.5).unproject(camera);
     pointerRay.origin.copy(camera.position);
     pointerRay.direction.copy(pointerNdc).sub(camera.position).normalize();
-    group.getWorldPosition(groupWorldPosition);
-    group.getWorldQuaternion(groupWorldQuaternion);
-    pointerPlaneNormal.set(0, 0, 1).applyQuaternion(groupWorldQuaternion).normalize();
-    pointerPlane.setFromNormalAndCoplanarPoint(pointerPlaneNormal, groupWorldPosition);
-    var pointerHitsGlobePlane = pointerRay.intersectPlane(pointerPlane, pointerWorld);
-    var pointerLocal = pointerHitsGlobePlane ? group.worldToLocal(pointerWorld) : new THREE.Vector3(0, 0, 0);
-    var pointerX = pointerLocal.x / sphereRadius;
-    var pointerY = pointerLocal.y / sphereRadius;
-    var pointerDistance = Math.sqrt(pointerX * pointerX + pointerY * pointerY);
-    var targetX = THREE.MathUtils.clamp(pointerX, -0.96, 0.96);
-    var targetY = THREE.MathUtils.clamp(pointerY, -0.96, 0.96);
-    var targetZ = Math.sqrt(Math.max(0.04, 1 - targetX * targetX - targetY * targetY));
-    var targetDirection = new THREE.Vector3(targetX, targetY, targetZ).normalize();
-    cursorDirection.lerp(targetDirection, 0.095).normalize();
-    var overGlobe = mouse.active && pointerHitsGlobePlane && pointerDistance < 1.1;
-    var pointerPresence = overGlobe ? 1 - THREE.MathUtils.smoothstep(pointerDistance, 0.8, 1.1) : 0;
-    var deformationTarget = pointerPresence;
-    deformation += (deformationTarget - deformation) * (deformationTarget > deformation ? 0.06 : 0.035);
-    var cursorOnGlobe = deformation;
+    var hit = mouse.active && !calm && pointerRay.intersectSphere(hitSphere, pointerWorld);
+    var presence = 0;
+    if (hit) {
+      targetDirection.copy(pointerWorld).sub(groupWorldPosition).normalize();
+      worldHoverDirection.lerp(targetDirection, 1 - Math.exp(-dt * 5)).normalize();
+      var distance = Math.sqrt(pointerRay.distanceSqToPoint(groupWorldPosition)) / hitSphere.radius;
+      presence = 1 - THREE.MathUtils.smoothstep(distance, 0.88, 1);
+    }
+    cage.getWorldQuaternion(cageQuaternion);
+    cursorDirection.copy(worldHoverDirection).applyQuaternion(cageQuaternion.invert()).normalize();
+    deformation += (presence - deformation) * (1 - Math.exp(-dt / (presence > deformation ? 0.24 : 0.42)));
     for (var li = 0; li < networkBaseLines.length; li += 3) {
-      deformPointInto(networkLinePositions, li, networkBaseLines[li], networkBaseLines[li + 1], networkBaseLines[li + 2], t, cursorOnGlobe, speed);
+      deformPointInto(networkLinePositions, li, networkBaseLines[li], networkBaseLines[li + 1], networkBaseLines[li + 2], t, deformation);
     }
     networkLineAttribute.needsUpdate = true;
     for (var ni = 0; ni < networkBase.length; ni += 3) {
-      deformPointInto(networkPointPositions, ni, networkBase[ni], networkBase[ni + 1], networkBase[ni + 2], t, cursorOnGlobe, speed);
+      deformPointInto(networkPointPositions, ni, networkBase[ni], networkBase[ni + 1], networkBase[ni + 2], t, deformation);
     }
     networkPointsGeometry.attributes.position.needsUpdate = true;
-    for (var vi = 0; vi < softPosition.count; vi++) {
-      var ix = vi * 3;
-      var bx = softBase[ix], by = softBase[ix + 1], bz = softBase[ix + 2];
-      deformPointInto(softPosition.array, ix, bx, by, bz, t, cursorOnGlobe, speed);
-    }
-    softPosition.needsUpdate = true;
-    softUniforms.cursorDirection.value.copy(cursorDirection);
-    softUniforms.hover.value = cursorOnGlobe;
     networkMaterial.opacity = 0.24 + Math.sin(t * 0.8) * 0.012;
-    mouse.speed *= 0.94;
-
-    // Сфера догоняет курсор с инерцией, затем продолжает мягко дрейфовать.
-    group.rotation.y += (mouse.x * 0.7 + Math.sin(t * 0.22) * 0.09 - group.rotation.y) * 0.026;
-    group.rotation.x += (-mouse.y * 0.48 + Math.sin(t * 0.31) * 0.07 - group.rotation.x) * 0.028;
-    group.rotation.z += (mouse.x * 0.16 + Math.sin(t * 0.18) * 0.035 - group.rotation.z) * 0.023;
-    group.position.y += (Math.sin(t * 0.38) * 0.12 - mouse.y * 0.3 - group.position.y) * 0.035;
-    group.position.x += ((baseX + mouse.x * 0.58) - group.position.x) * 0.032;
-    group.scale.setScalar(baseScale * (1 + Math.sin(t * 0.8) * 0.012));
-
-    orbit.rotation.z += (mouse.x * 0.52 + Math.sin(t * 0.35) * 0.24 - orbit.rotation.z) * 0.045;
-    orbit.rotation.x += (0.9 + mouse.y * 0.52 - orbit.rotation.x) * 0.04;
-    orbit.rotation.y += (0.16 - mouse.x * 0.3 - orbit.rotation.y) * 0.04;
-
     glow.position.x = group.position.x;
-    glow.material.opacity = 0.17 + Math.sin(t * 0.8) * 0.045;
-
+    glow.position.y = group.position.y;
+    glow.material.opacity = 0.34 + Math.sin(t * 0.8) * 0.035;
     stars.rotation.y = t * 0.012;
-
-    camera.position.x += (mouse.x * 0.32 - camera.position.x) * 0.035;
-    camera.position.y += (-mouse.y * 0.25 - camera.position.y) * 0.035;
-    camera.lookAt(scene.position);
-
+    mouse.speed *= Math.exp(-dt * 4);
     renderer.render(scene, camera);
   })();
+
 
   window.addEventListener('resize', function () {
     camera.aspect = window.innerWidth / window.innerHeight;
