@@ -9,15 +9,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23ff4d00' stroke-width='9' stroke-dasharray='74 33' stroke-linecap='round' transform='rotate(115 32 32)'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=20261021-439a15f">
+  <link rel="stylesheet" href="css/style.css?v=20261022-orb-soft-orange7">
 </head>
 <body>
   <canvas id="webgl"></canvas>
+  <div class="scene-photo" aria-hidden="true"></div>
   <div class="cursor-dot"></div>
   <div class="cursor-ring"></div>
   <div class="noise"></div>
   <div class="progress-bar"></div>
-  <div class="hover-preview"><img src="" alt=""></div>
+  <nav class="section-rail" aria-label="Навигация по разделам страницы">
+    <a href="#top" class="is-active" data-section="top" data-label="Студия" aria-label="Студия"><i></i></a>
+    <a href="#website-examples" data-section="website-examples" data-label="Веб-сайты" aria-label="Веб-сайты"><i></i></a>
+    <a href="#services" data-section="services" data-label="Услуги" aria-label="Услуги"><i></i></a>
+    <a href="#process" data-section="process" data-label="Процесс" aria-label="Процесс"><i></i></a>
+    <a href="#projects" data-section="projects" data-label="Проекты" aria-label="Проекты"><i></i></a>
+  </nav>
+  <div class="hover-preview"><img loading="lazy" decoding="async" src="" alt=""></div>
 
   <header class="header">
     <a class="logo" href="index.html">CyberCraft<span>&reg;</span></a>
@@ -34,7 +42,7 @@
 
   <main>
     <!-- HERO -->
-    <section class="hero">
+    <section class="hero" id="top">
       <p class="label reveal">IT-студия полного цикла &middot; Est. 2024</p>
       <h1 class="reveal" data-delay="1">Мы делаем<br><em>цифровые</em><br>продукты</h1>
       <p class="hero-sub reveal" data-delay="2">CyberCraft — студия веб-разработки. Проектируем, разрабатываем и запускаем сайты, сервисы и бренды, которые выглядят дорого и работают быстро.</p>
@@ -68,7 +76,7 @@
 
     <!-- IMAGE BAND (parallax) -->
     <section class="img-band">
-      <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1800&auto=format&fit=crop" alt="Студия CyberCraft" data-parallax="0.12">
+      <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1800&auto=format&fit=crop" alt="Студия CyberCraft" data-parallax="0.12">
       <div class="img-band-caption">
         <p class="label">Студия</p>
         <h2 class="display">Москва &middot; Remote</h2>
@@ -76,7 +84,7 @@
     </section>
 
     <!-- SERVICES -->
-    <section class="section">
+    <section class="section" id="services">
       <div class="section-head reveal">
         <div>
           <p class="label">Что мы делаем</p>
@@ -112,6 +120,43 @@
       </div>
     </section>
 
+    <!-- WEBSITE EXAMPLES -->
+    <section class="section website-showcase" id="website-examples">
+      <div class="section-head reveal">
+        <div>
+          <p class="label">Цифровой дизайн</p>
+          <h2 class="display">Веб-сайты <span>примеры</span></h2>
+        </div>
+        <p class="showcase-note">Шесть направлений — шесть разных визуальных историй.<br>Нажмите на карточку, чтобы открыть концепт.</p>
+      </div>
+      <div class="website-grid reveal">
+        <a class="website-card" href="preview.html?site=atelier" style="--site-accent:#c7a36a;--site-image:url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=75&w=900&auto=format&fit=crop')">
+          <span class="website-thumb"><span class="thumb-brand">ATELIER <i>NO. 08</i></span><span class="thumb-title">Новая<br>форма</span><span class="thumb-cta">ОТКРЫТЬ КОЛЛЕКЦИЮ ↗</span></span>
+          <span class="website-caption"><b>01 / Мода и стиль</b><span>Редакционная витрина</span></span>
+        </a>
+        <a class="website-card" href="preview.html?site=travel" style="--site-accent:#ddc58d;--site-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=75&w=900&auto=format&fit=crop')">
+          <span class="website-thumb"><span class="thumb-brand">NORTH / 62°</span><span class="thumb-title">Дальше<br>только тишина</span><span class="thumb-cta">НАЙТИ СВОЁ МЕСТО ↗</span></span>
+          <span class="website-caption"><b>02 / Путешествия</b><span>Атмосферный лендинг</span></span>
+        </a>
+        <a class="website-card" href="preview.html?site=finance" style="--site-accent:#75e5be;--site-image:url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=75&w=900&auto=format&fit=crop')">
+          <span class="website-thumb"><span class="thumb-brand">FORMA <i>CAPITAL</i></span><span class="thumb-title">Деньги<br>в движении.</span><span class="thumb-cta">ИЗУЧИТЬ ПЛАТФОРМУ ↗</span></span>
+          <span class="website-caption"><b>03 / Финансы</b><span>Технологичный продукт</span></span>
+        </a>
+        <a class="website-card" href="preview.html?site=restaurant" style="--site-accent:#efa97f;--site-image:url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=75&w=900&auto=format&fit=crop')">
+          <span class="website-thumb"><span class="thumb-brand">MISO <i>RESTAURANT</i></span><span class="thumb-title">Вкус<br>момента.</span><span class="thumb-cta">ЗАБРОНИРОВАТЬ СТОЛ ↗</span></span>
+          <span class="website-caption"><b>04 / Ресторан</b><span>Сайт с характером</span></span>
+        </a>
+        <a class="website-card" href="preview.html?site=architecture" style="--site-accent:#d3c7aa;--site-image:url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=75&w=900&auto=format&fit=crop')">
+          <span class="website-thumb"><span class="thumb-brand">FORMA / ARCH</span><span class="thumb-title">Пространство<br>для жизни.</span><span class="thumb-cta">СМОТРЕТЬ ПРОЕКТЫ ↗</span></span>
+          <span class="website-caption"><b>05 / Архитектура</b><span>Минимализм и форма</span></span>
+        </a>
+        <a class="website-card" href="preview.html?site=wellness" style="--site-accent:#b6d2a0;--site-image:url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=75&w=900&auto=format&fit=crop')">
+          <span class="website-thumb"><span class="thumb-brand">SOMA <i>WELLNESS CLUB</i></span><span class="thumb-title">Вернуться<br>к себе.</span><span class="thumb-cta">ВЫБРАТЬ ПРАКТИКУ ↗</span></span>
+          <span class="website-caption"><b>06 / Wellness</b><span>Спокойный digital-опыт</span></span>
+        </a>
+      </div>
+    </section>
+
     <!-- CLIENTS (ghost marquee) -->
     <div class="marquee marquee--ghost">
       <div class="marquee-track">
@@ -143,7 +188,7 @@
     </section>
 
     <!-- PROCESS -->
-    <section class="section" style="padding-top:0">
+    <section class="section" id="process" style="padding-top:0">
       <div class="section-head reveal">
         <div>
           <p class="label">Процесс</p>
@@ -180,7 +225,7 @@
     </section>
 
     <!-- PROJECTS PREVIEW -->
-    <section class="section" style="padding-top:0">
+    <section class="section" id="projects" style="padding-top:0">
       <div class="section-head reveal">
         <div>
           <p class="label">Избранное</p>
@@ -189,18 +234,20 @@
         <a class="btn btn--small" href="portfolio.html">Все проекты &nearr;</a>
       </div>
       <div class="projects reveal">
-        <a class="project tilt" href="portfolio.html">
+        <a class="project tilt" href="preview.html?project=finance">
           <div class="project-media">
-            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1400&auto=format&fit=crop" alt="Финансовая аналитика">
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1400&auto=format&fit=crop" alt="Финансовая аналитика">
+            <span class="project-marker"><i></i> CASE STUDY / 01 <b>&nearr;</b></span>
           </div>
           <div class="project-info">
             <h3>Финансовая аналитика</h3>
             <span>FinTech &middot; 2026</span>
           </div>
         </a>
-        <a class="project tilt" href="portfolio.html">
+        <a class="project tilt" href="preview.html?project=commerce">
           <div class="project-media">
-            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1400&auto=format&fit=crop" alt="Премиум E-Commerce">
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1400&auto=format&fit=crop" alt="Премиум E-Commerce">
+            <span class="project-marker"><i></i> CASE STUDY / 02 <b>&nearr;</b></span>
           </div>
           <div class="project-info">
             <h3>Премиум E-Commerce</h3>
@@ -328,6 +375,6 @@
   </button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-  <script src="js/main.js?v=20261021-439a15f"></script>
+  <script src="js/main.js?v=20261022-orb-soft-orange7"></script>
 </body>
 </html>

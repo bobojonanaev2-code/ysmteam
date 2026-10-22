@@ -50,14 +50,16 @@ document.querySelectorAll('.member-telegram[data-copy-username]').forEach(functi
 });
 
 /* ================= Shared mouse state ================= */
-var mouse = { x: 0, y: 0, speed: 0 };
+var mouse = { x: 0, y: 0, speed: 0, active: false };
 window.addEventListener('mousemove', function (e) {
   var nx = (e.clientX / window.innerWidth - 0.5) * 2;
   var ny = (e.clientY / window.innerHeight - 0.5) * 2;
   mouse.speed = Math.min(50, Math.abs(nx - mouse.x) * 70 + Math.abs(ny - mouse.y) * 70 + mouse.speed * 0.55);
   mouse.x = nx;
   mouse.y = ny;
+  mouse.active = true;
 });
+window.addEventListener('mouseleave', function () { mouse.active = false; });
 
 /* ================= 1. Custom cursor ================= */
 (function () {
@@ -386,6 +388,70 @@ var Sound = (function () {
   onScroll();
 })();
 
+/* ================= Навигация-маркеры по разделам ================= */
+(function () {
+  var links = document.querySelectorAll('.section-rail [data-section]');
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      links.forEach(function (link) {
+        link.classList.toggle('is-active', link.getAttribute('data-section') === entry.target.id);
+      });
+    });
+  }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
+  links.forEach(function (link) {
+    var section = document.getElementById(link.getAttribute('data-section'));
+    if (section) observer.observe(section);
+  });
+})();
+
+/* ================= 12. Фоновая фотосмена по скроллу и курсору ================= */
+(function () {
+  var layer = document.querySelector('.scene-photo');
+  if (!layer) return;
+  var scenes = [
+    { at: 0.1, url: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=70&w=1600&auto=format&fit=crop' },
+    { at: 0.3, url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=70&w=1600&auto=format&fit=crop' },
+    { at: 0.48, url: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=70&w=1600&auto=format&fit=crop' },
+    { at: 0.66, url: 'https://images.unsplash.com/photo-1558655146-d09347e92766?q=70&w=1600&auto=format&fit=crop' },
+    { at: 0.84, url: 'https://images.unsplash.com/photo-1523726491678-bf852e717f6a?q=70&w=1600&auto=format&fit=crop' }
+  ];
+  var active = -1;
+  var px = 0, py = 0;
+  function update() {
+    var range = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    var progress = window.scrollY / range;
+    var next = 0;
+    for (var i = 0; i < scenes.length; i++) if (progress >= scenes[i].at) next = i;
+    if (next !== active) {
+      active = next;
+      layer.style.backgroundImage = 'url("' + scenes[active].url + '")';
+      layer.classList.add('is-active');
+      layer.classList.remove('is-flicker');
+      void layer.offsetWidth;
+      layer.classList.add('is-flicker');
+    }
+  }
+  window.addEventListener('mousemove', function (e) {
+    px = (e.clientX / window.innerWidth - .5) * 12;
+    py = (e.clientY / window.innerHeight - .5) * 9;
+    layer.style.backgroundPosition = 'calc(50% + ' + px + 'px) calc(50% + ' + py + 'px)';
+    layer.style.transform = 'scale(1.06) translate(' + px * -.16 + 'px,' + py * -.16 + 'px)';
+  }, { passive: true });
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+
+/* Не оставляем битые фотографии на странице: вместо них показываем аккуратную заглушку. */
+document.querySelectorAll('img').forEach(function (image) {
+  image.addEventListener('error', function () {
+    image.classList.add('image-failed');
+    if (image.parentElement) image.parentElement.classList.add('has-image-fallback');
+  }, { once: true });
+});
+
 /* ================= 13. Three.js: 3D-фон =================
    Объёмный знак CyberCraft в оранжевой каркасной сфере,
    окружённый частицами и мягким свечением. */
@@ -407,8 +473,8 @@ var Sound = (function () {
     c.width = 256; c.height = 256;
     var x = c.getContext('2d');
     var g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
-    g.addColorStop(0, 'rgba(255,77,0,.85)');
-    g.addColorStop(0.35, 'rgba(255,77,0,.28)');
+    g.addColorStop(0, 'rgba(255,77,0,.62)');
+    g.addColorStop(0.35, 'rgba(255,77,0,.22)');
     g.addColorStop(1, 'rgba(255,77,0,0)');
     x.fillStyle = g;
     x.fillRect(0, 0, 256, 256);
@@ -425,9 +491,9 @@ var Sound = (function () {
   /* --- Объёмный знак CyberCraft: буква C --- */
   var emblem = new THREE.Group();
   var emblemMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff5a1f,
-    emissive: 0x671d00,
-    emissiveIntensity: 0.55,
+    color: 0xff6a21,
+    emissive: 0x702400,
+    emissiveIntensity: 0.52,
     roughness: 0.24,
     metalness: 0.48
   });
@@ -440,25 +506,14 @@ var Sound = (function () {
 
   var markNode = new THREE.Mesh(
     new THREE.SphereGeometry(0.075, 24, 24),
-    new THREE.MeshBasicMaterial({ color: 0xf5f5f5 })
+    new THREE.MeshBasicMaterial({ color: 0xffffff })
   );
   markNode.position.set(1.08, 0, 0.02);
   emblem.add(markNode);
   group.add(emblem);
   /* --- Каркас и частицы вокруг --- */
-  var wire = new THREE.LineSegments(
-    new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(outerStructureRadius, 1)),
-    new THREE.LineBasicMaterial({ color: 0xff4d00, transparent: true, opacity: 0.18 })
-  );
-  var core = new THREE.LineSegments(
-    new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(innerStructureRadius, 0)),
-    new THREE.LineBasicMaterial({ color: 0xf5f5f5, transparent: true, opacity: 0.24 })
-  );
-  group.add(wire);
-  group.add(core);
-
-  var baseX = window.innerWidth < 820 ? 2.0 : 2.7;
-  var baseScale = window.innerWidth < 820 ? 0.5 : 1;
+  var baseX = window.innerWidth < 820 ? 0.65 : 1.45;
+  var baseScale = window.innerWidth < 820 ? 0.43 : 0.72;
   group.scale.setScalar(baseScale);
   group.position.x = baseX;
   scene.add(group);
@@ -467,11 +522,11 @@ var Sound = (function () {
   var glow = new THREE.Sprite(new THREE.SpriteMaterial({
     map: makeGlowTexture(),
     transparent: true,
-    opacity: 0.22,
+    opacity: 0.32,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   }));
-  glow.scale.setScalar(9.5 * baseScale);
+  glow.scale.setScalar(8.2 * baseScale);
   glow.position.set(baseX, 0, -1.5);
   scene.add(glow);
 
@@ -491,38 +546,246 @@ var Sound = (function () {
   var key = new THREE.DirectionalLight(0xffffff, 1.5);
   key.position.set(4, 6, 8);
   scene.add(key);
-  var rimLight = new THREE.PointLight(0xff4d00, 60, 40);
+  var rimLight = new THREE.PointLight(0xff5a14, 48, 40);
   rimLight.position.set(-6, 3, 4);
   scene.add(rimLight);
-  var fillLight = new THREE.PointLight(0x7d94b5, 18, 30);
+  var fillLight = new THREE.PointLight(0xff8a45, 16, 30);
   fillLight.position.set(4, -3, 6);
   scene.add(fillLight);
 
+  /* Топология каркаса остаётся прежней. Каждое ребро рисуется короткими
+     плавными сегментами, чтобы весь каркас гнулся как единая мягкая форма. */
+  var sphereRadius = outerStructureRadius * 1.08;
+  var sphereGeometry = new THREE.IcosahedronGeometry(sphereRadius, 2);
+  var rawVertices = sphereGeometry.attributes.position.array;
+  var networkVertices = [];
+  var vertexIds = Object.create(null);
+  var networkEdges = [];
+  var edgeIds = Object.create(null);
+  function getNetworkVertex(x, y, z) {
+    var key = Math.round(x * 10000) + ':' + Math.round(y * 10000) + ':' + Math.round(z * 10000);
+    if (vertexIds[key] !== undefined) return vertexIds[key];
+    var id = networkVertices.length / 3;
+    vertexIds[key] = id;
+    networkVertices.push(x, y, z);
+    return id;
+  }
+  function addNetworkEdge(a, b) {
+    var first = Math.min(a, b), second = Math.max(a, b);
+    var key = first + ':' + second;
+    if (edgeIds[key]) return;
+    edgeIds[key] = true;
+    networkEdges.push([first, second]);
+  }
+  for (var ti = 0; ti < rawVertices.length; ti += 9) {
+    var va = getNetworkVertex(rawVertices[ti], rawVertices[ti + 1], rawVertices[ti + 2]);
+    var vb = getNetworkVertex(rawVertices[ti + 3], rawVertices[ti + 4], rawVertices[ti + 5]);
+    var vc = getNetworkVertex(rawVertices[ti + 6], rawVertices[ti + 7], rawVertices[ti + 8]);
+    addNetworkEdge(va, vb);
+    addNetworkEdge(vb, vc);
+    addNetworkEdge(vc, va);
+  }
+  sphereGeometry.dispose();
+
+  var networkBase = new Float32Array(networkVertices);
+  var networkPointsGeometry = new THREE.BufferGeometry();
+  var networkPointPositions = new Float32Array(networkBase);
+  networkPointsGeometry.setAttribute('position', new THREE.BufferAttribute(networkPointPositions, 3));
+  var globeNodes = new THREE.Points(networkPointsGeometry, new THREE.PointsMaterial({
+    color: 0xffbd8c, size: 0.034, transparent: true, opacity: 0.72,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  globeNodes.renderOrder = 3;
+  globeNodes.frustumCulled = false;
+  group.add(globeNodes);
+
+  var edgeSubdivisions = 8;
+  var networkBaseLines = new Float32Array(networkEdges.length * edgeSubdivisions * 2 * 3);
+  var networkLinePositions = new Float32Array(networkBaseLines.length);
+  function writeGreatCirclePoint(a, b, progress, offset) {
+    var ax = networkBase[a * 3], ay = networkBase[a * 3 + 1], az = networkBase[a * 3 + 2];
+    var bx = networkBase[b * 3], by = networkBase[b * 3 + 1], bz = networkBase[b * 3 + 2];
+    var dot = THREE.MathUtils.clamp((ax * bx + ay * by + az * bz) / (sphereRadius * sphereRadius), -1, 1);
+    var arc = Math.acos(dot);
+    var sinArc = Math.sin(arc);
+    var weightA = sinArc > 0.0001 ? Math.sin((1 - progress) * arc) / sinArc : 1 - progress;
+    var weightB = sinArc > 0.0001 ? Math.sin(progress * arc) / sinArc : progress;
+    networkBaseLines[offset] = ax * weightA + bx * weightB;
+    networkBaseLines[offset + 1] = ay * weightA + by * weightB;
+    networkBaseLines[offset + 2] = az * weightA + bz * weightB;
+  }
+  var lineCursor = 0;
+  for (var ei = 0; ei < networkEdges.length; ei++) {
+    var edge = networkEdges[ei];
+    for (var si = 0; si < edgeSubdivisions; si++) {
+      writeGreatCirclePoint(edge[0], edge[1], si / edgeSubdivisions, lineCursor);
+      writeGreatCirclePoint(edge[0], edge[1], (si + 1) / edgeSubdivisions, lineCursor + 3);
+      lineCursor += 6;
+    }
+  }
+  networkLinePositions.set(networkBaseLines);
+  var networkLineGeometry = new THREE.BufferGeometry();
+  var networkLineAttribute = new THREE.BufferAttribute(networkLinePositions, 3);
+  networkLineAttribute.setUsage(THREE.DynamicDrawUsage);
+  networkLineGeometry.setAttribute('position', networkLineAttribute);
+  var networkMaterial = new THREE.LineBasicMaterial({
+    color: 0xff4d00, transparent: true, opacity: 0.24,
+    blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false
+  });
+  var networkLines = new THREE.LineSegments(networkLineGeometry, networkMaterial);
+  networkLines.renderOrder = 2;
+  networkLines.frustumCulled = false;
+  group.add(networkLines);
+
+  var softGeometry = new THREE.SphereGeometry(sphereRadius * 1.006, 64, 48);
+  var softPosition = softGeometry.attributes.position;
+  var softBase = new Float32Array(softPosition.array);
+  var softUniforms = {
+    cursorDirection: { value: new THREE.Vector3(0, 0, 1) },
+    hover: { value: 0 }
+  };
+  var softMaterial = new THREE.MeshBasicMaterial({
+    color: 0xff4d00, transparent: true, opacity: 1,
+    blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    depthWrite: false, toneMapped: false
+  });
+  softMaterial.onBeforeCompile = function (shader) {
+    shader.uniforms.uSoftCursorDirection = softUniforms.cursorDirection;
+    shader.uniforms.uSoftHover = softUniforms.hover;
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <common>',
+      '#include <common>\nvarying vec3 vSoftDirection;'
+    ).replace(
+      '#include <begin_vertex>',
+      '#include <begin_vertex>\nvSoftDirection = normalize(position);'
+    );
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <common>',
+      '#include <common>\nuniform vec3 uSoftCursorDirection;\nuniform float uSoftHover;\nvarying vec3 vSoftDirection;'
+    ).replace(
+      '#include <color_fragment>',
+      '#include <color_fragment>\n' +
+      'float softAngle = acos(clamp(dot(normalize(vSoftDirection), normalize(uSoftCursorDirection)), -1.0, 1.0));\n' +
+      'float softFocus = exp(-pow(softAngle / 0.9, 2.0) * 0.5);\n' +
+      'float softLip = exp(-pow((softAngle - 0.96) / 0.38, 2.0) * 0.5);\n' +
+      'diffuseColor.a *= 0.012 + uSoftHover * (0.045 + 0.125 * softFocus + 0.055 * softLip);\n' +
+      'diffuseColor.rgb *= mix(0.5, 1.0, softFocus);'
+    );
+  };
+  softMaterial.customProgramCacheKey = function () { return 'cybercraft-soft-orb-hover'; };
+  var softShell = new THREE.Mesh(softGeometry, softMaterial);
+  softShell.renderOrder = 1;
+  softShell.frustumCulled = false;
+  group.add(softShell);
+
+  var orbit = new THREE.Mesh(
+    new THREE.TorusGeometry(2.05, 0.018, 8, 120),
+    new THREE.MeshBasicMaterial({ color: 0xffad78, transparent: true, opacity: 0.92, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  orbit.rotation.set(0.9, 0.16, -0.34);
+  orbit.scale.set(1.2, 0.48, 1);
+  orbit.renderOrder = 4;
+  group.add(orbit);
+
   /* --- Анимация: медленный дрейф и реакция на курсор --- */
   var clock = new THREE.Clock();
+  var cursorDirection = new THREE.Vector3(0, 0, 1);
+  var pointerNdc = new THREE.Vector3();
+  var pointerWorld = new THREE.Vector3();
+  var pointerPlaneNormal = new THREE.Vector3();
+  var groupWorldPosition = new THREE.Vector3();
+  var groupWorldQuaternion = new THREE.Quaternion();
+  var pointerRay = new THREE.Ray();
+  var pointerPlane = new THREE.Plane();
+  var deformation = 0;
+
+  function deformPointInto(target, offset, bx, by, bz, t, amount, speed) {
+    var nx = bx / sphereRadius, ny = by / sphereRadius, nz = bz / sphereRadius;
+    var normalLength = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+    nx /= normalLength; ny /= normalLength; nz /= normalLength;
+    var facing = THREE.MathUtils.clamp(nx * cursorDirection.x + ny * cursorDirection.y + nz * cursorDirection.z, -1, 1);
+    var angle = Math.acos(facing);
+    var dentRatio = angle / 0.82;
+    var lipRatio = (angle - 0.92) / 0.34;
+    var dent = Math.exp(-dentRatio * dentRatio * 0.5);
+    var raisedLip = Math.exp(-lipRatio * lipRatio * 0.5);
+    var softWave = Math.sin(angle * 5.2 - t * 1.25 + nx * 1.1 + ny * 0.8) * Math.exp(-angle * 1.35) * 0.022;
+    var radial = 1 + amount * (-0.17 * dent + 0.075 * raisedLip + softWave);
+    var pull = amount * (0.12 + speed * 0.035) * Math.exp(-Math.pow(angle / 1.1, 2) * 0.5);
+    var tangentX = cursorDirection.x - nx * facing;
+    var tangentY = cursorDirection.y - ny * facing;
+    var tangentZ = cursorDirection.z - nz * facing;
+    target[offset] = bx * radial + tangentX * sphereRadius * pull;
+    target[offset + 1] = by * radial + tangentY * sphereRadius * pull;
+    target[offset + 2] = bz * radial + tangentZ * sphereRadius * pull;
+  }
 
   (function animate() {
     requestAnimationFrame(animate);
     var t = clock.getElapsedTime();
 
-    // Повороты и дрейф
-    group.rotation.y += 0.0016;
-    group.rotation.x += (mouse.y * 0.28 - group.rotation.x) * 0.04;
-    group.rotation.z += (mouse.x * 0.14 - group.rotation.z) * 0.04;
-    group.position.y = Math.sin(t * 0.5) * 0.18;
-    group.position.x += ((baseX + mouse.x * 0.35) - group.position.x) * 0.04;
+    var speed = Math.min(mouse.speed / 42, 1);
+    group.updateMatrixWorld(true);
+    pointerNdc.set(mouse.x, -mouse.y, 0.5).unproject(camera);
+    pointerRay.origin.copy(camera.position);
+    pointerRay.direction.copy(pointerNdc).sub(camera.position).normalize();
+    group.getWorldPosition(groupWorldPosition);
+    group.getWorldQuaternion(groupWorldQuaternion);
+    pointerPlaneNormal.set(0, 0, 1).applyQuaternion(groupWorldQuaternion).normalize();
+    pointerPlane.setFromNormalAndCoplanarPoint(pointerPlaneNormal, groupWorldPosition);
+    var pointerHitsGlobePlane = pointerRay.intersectPlane(pointerPlane, pointerWorld);
+    var pointerLocal = pointerHitsGlobePlane ? group.worldToLocal(pointerWorld) : new THREE.Vector3(0, 0, 0);
+    var pointerX = pointerLocal.x / sphereRadius;
+    var pointerY = pointerLocal.y / sphereRadius;
+    var pointerDistance = Math.sqrt(pointerX * pointerX + pointerY * pointerY);
+    var targetX = THREE.MathUtils.clamp(pointerX, -0.96, 0.96);
+    var targetY = THREE.MathUtils.clamp(pointerY, -0.96, 0.96);
+    var targetZ = Math.sqrt(Math.max(0.04, 1 - targetX * targetX - targetY * targetY));
+    var targetDirection = new THREE.Vector3(targetX, targetY, targetZ).normalize();
+    cursorDirection.lerp(targetDirection, 0.095).normalize();
+    var overGlobe = mouse.active && pointerHitsGlobePlane && pointerDistance < 1.1;
+    var pointerPresence = overGlobe ? 1 - THREE.MathUtils.smoothstep(pointerDistance, 0.8, 1.1) : 0;
+    var deformationTarget = pointerPresence;
+    deformation += (deformationTarget - deformation) * (deformationTarget > deformation ? 0.06 : 0.035);
+    var cursorOnGlobe = deformation;
+    for (var li = 0; li < networkBaseLines.length; li += 3) {
+      deformPointInto(networkLinePositions, li, networkBaseLines[li], networkBaseLines[li + 1], networkBaseLines[li + 2], t, cursorOnGlobe, speed);
+    }
+    networkLineAttribute.needsUpdate = true;
+    for (var ni = 0; ni < networkBase.length; ni += 3) {
+      deformPointInto(networkPointPositions, ni, networkBase[ni], networkBase[ni + 1], networkBase[ni + 2], t, cursorOnGlobe, speed);
+    }
+    networkPointsGeometry.attributes.position.needsUpdate = true;
+    for (var vi = 0; vi < softPosition.count; vi++) {
+      var ix = vi * 3;
+      var bx = softBase[ix], by = softBase[ix + 1], bz = softBase[ix + 2];
+      deformPointInto(softPosition.array, ix, bx, by, bz, t, cursorOnGlobe, speed);
+    }
+    softPosition.needsUpdate = true;
+    softUniforms.cursorDirection.value.copy(cursorDirection);
+    softUniforms.hover.value = cursorOnGlobe;
+    networkMaterial.opacity = 0.24 + Math.sin(t * 0.8) * 0.012;
+    mouse.speed *= 0.94;
+
+    // Сфера догоняет курсор с инерцией, затем продолжает мягко дрейфовать.
+    group.rotation.y += (mouse.x * 0.7 + Math.sin(t * 0.22) * 0.09 - group.rotation.y) * 0.026;
+    group.rotation.x += (-mouse.y * 0.48 + Math.sin(t * 0.31) * 0.07 - group.rotation.x) * 0.028;
+    group.rotation.z += (mouse.x * 0.16 + Math.sin(t * 0.18) * 0.035 - group.rotation.z) * 0.023;
+    group.position.y += (Math.sin(t * 0.38) * 0.12 - mouse.y * 0.3 - group.position.y) * 0.035;
+    group.position.x += ((baseX + mouse.x * 0.58) - group.position.x) * 0.032;
     group.scale.setScalar(baseScale * (1 + Math.sin(t * 0.8) * 0.012));
 
-    core.rotation.y -= 0.004;
-    wire.rotation.y += 0.0006;
+    orbit.rotation.z += (mouse.x * 0.52 + Math.sin(t * 0.35) * 0.24 - orbit.rotation.z) * 0.045;
+    orbit.rotation.x += (0.9 + mouse.y * 0.52 - orbit.rotation.x) * 0.04;
+    orbit.rotation.y += (0.16 - mouse.x * 0.3 - orbit.rotation.y) * 0.04;
 
     glow.position.x = group.position.x;
     glow.material.opacity = 0.17 + Math.sin(t * 0.8) * 0.045;
 
     stars.rotation.y = t * 0.012;
 
-    camera.position.x += (mouse.x * 0.45 - camera.position.x) * 0.03;
-    camera.position.y += (-mouse.y * 0.35 - camera.position.y) * 0.03;
+    camera.position.x += (mouse.x * 0.32 - camera.position.x) * 0.035;
+    camera.position.y += (-mouse.y * 0.25 - camera.position.y) * 0.035;
     camera.lookAt(scene.position);
 
     renderer.render(scene, camera);
@@ -532,8 +795,8 @@ var Sound = (function () {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    baseX = window.innerWidth < 820 ? 2.0 : 2.7;
-    baseScale = window.innerWidth < 820 ? 0.5 : 1;
-    glow.scale.setScalar(9.5 * baseScale);
+    baseX = window.innerWidth < 820 ? 0.65 : 1.45;
+    baseScale = window.innerWidth < 820 ? 0.43 : 0.72;
+    glow.scale.setScalar(8.2 * baseScale);
   });
 })();
